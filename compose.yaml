@@ -1,9 +1,23 @@
 version: '3'
 services:
-  web:
+
+  staticWeb:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "3000:80"
+    volumes:
+      - ./staticWeb/www
 
+  dynamicWeb:
+    
+
+  reverse-proxy:
+    image: traefik:v2.10
+    command: --api.insecure=true --providers.docker
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
