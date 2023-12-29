@@ -1,9 +1,40 @@
 version: '3'
 services:
-  web:
+
+  sweb:
     build:
-      context: .
+      context: ./sweb
       dockerfile: Dockerfile
     ports:
       - "3000:80"
+    volumes:
+      - ./sweb/www:/usr/share/nginx/html
+    deploy:
+      replicas: 1
+    labels:
+      - traefik.http.routers.sweb.rule=Host(`sweb.localhost`)
+      - traefik.http.services.sweb.loadbalancer.server.port=3000
 
+  dweb:
+    build:
+      context: ./dweb
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    volumes:
+      - ./dweb:/usr/share/nginx/html
+    deploy:
+      replicas: 1
+    labels:
+      - traefik.http.routers.dweb.rule=Host(`dweb.localhost`)
+      - traefik.http.services.dweb.loadbalancer.server.port=3001
+
+
+  reverse-proxy:
+    image: traefik:v2.10
+    command: --api.insecure=true --providers.docker
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
