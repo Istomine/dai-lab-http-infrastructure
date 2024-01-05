@@ -50,6 +50,26 @@ public class KirbyController {
         System.out.println(kirby.getName() + " a ete nourri");
     }
 
+    public void destroyKirby(Context ctx){
+        try{
+            kirbys.remove(Integer.parseInt(ctx.pathParam("id")));
+        }catch (Exception e){
+            ctx.status(400);
+        }
+        ctx.status(200);
+    }
+
+    public void destroyAllKirby(Context ctx){
+        try{
+            kirbys.forEach((key,value)->{
+                kirbys.remove(key);
+            });
+        }catch (Exception e){
+            ctx.status(400);
+        }
+        ctx.status(200);
+    }
+
     public void createKirby(Context ctx){
         ObjectMapper objectMapper = new ObjectMapper();
         try {

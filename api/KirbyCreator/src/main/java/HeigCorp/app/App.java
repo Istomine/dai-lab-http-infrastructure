@@ -18,5 +18,7 @@ public class App
         app.get("/kirby/feed/{id}", kirbyController::feedKirby);
         app.get("/kirby/get/{id}", kirbyController::getOneKirby);
         app.get("/kirby/get", kirbyController::getAllKirby);
+        app.delete("/kirby/delete/{id}", kirbyController::destroyKirby);
+        app.delete("/kirby/delete",kirbyController::destroyAllKirby);
     }
 }
