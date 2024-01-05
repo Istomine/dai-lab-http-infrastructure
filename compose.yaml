@@ -1,9 +1,39 @@
 version: '3'
 services:
-  web:
+
+  sweb:
     build:
-      context: .
+      context: ./sweb
+      dockerfile: Dockerfile
+    volumes:
+      - ./sweb/www:/usr/share/nginx/html
+    deploy:
+      replicas: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sweb.rule=Host(`localhost`)"
+
+
+  dweb:
+    build:
+      context: ./dweb
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "3001:80"
+    deploy:
+      replicas: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dweb.rule=(Host(`localhost`) && Path(`/api`))"
 
+  reverse-proxy:
+    image: traefik:v2.10
+    command:
+     - "--api.insecure=true"
+     - "--providers.docker"
+     - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
