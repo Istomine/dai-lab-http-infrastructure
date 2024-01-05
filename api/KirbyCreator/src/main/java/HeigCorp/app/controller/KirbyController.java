@@ -2,10 +2,14 @@ package HeigCorp.app.controller;
 
 import HeigCorp.app.model.Kirby;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.http.Context;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class KirbyController {
@@ -24,6 +28,21 @@ public class KirbyController {
         kirby.setFunPoint(kirby.getFunPoint() - tickNumber * 10);
     }
 
+    public void getAllKirby(Context ctx){
+        ArrayList<Kirby> kirbyList = new ArrayList<>();
+        kirbys.forEach((key,value) ->{
+            updateKirbyStat(value);
+            kirbyList.add(value);
+        });
+        ctx.json(kirbyList.toArray());
+    }
+
+    public void getOneKirby(Context ctx){
+        Kirby kirby = kirbys.get(Integer.parseInt(ctx.pathParam("id")));
+        updateKirbyStat(kirby);
+        ctx.json(kirby);
+    }
+
     public void feedKirby(Context ctx){
         Kirby kirby = kirbys.get(Integer.parseInt(ctx.pathParam("id")));
         updateKirbyStat(kirby);
@@ -32,8 +51,16 @@ public class KirbyController {
     }
 
     public void createKirby(Context ctx){
-        Kirby kirby = new Kirby("René","image");
-        kirbys.put(id,kirby);
-        System.out.println(kirby.getName() + " created !");
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            JsonNode object = objectMapper.readTree(ctx.body());
+            Kirby kirby = new Kirby(object.get("name").asText(),object.get("image").asText());
+            kirbys.put(id++,kirby);
+            System.out.println(kirby.getName() + " created !");
+        } catch (JsonProcessingException e) {
+            ctx.status(403);
+            System.err.println("Error creating Kirbys");
+        }
+        ctx.status(200);
     }
 }
