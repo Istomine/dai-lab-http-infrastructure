@@ -19,6 +19,9 @@ public class KirbyController {
 
     public KirbyController(){
         this.id = 0;
+
+        Kirby test = new Kirby("Rene","lol");
+        kirbys.put(++id,test);
     }
     private void updateKirbyStat(Kirby kirby){
         Duration durationLastUpdated  = Duration.between(Instant.now(),kirby.getLastUpdated());
