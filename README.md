@@ -29,3 +29,44 @@ La ligne `events {
     worker_connections 1024;
 }
 ` sert a specifier le nombre de connection simultané. Vu que le labo sert a simuler une grosse architecture nous avons mis un nombre un peu grand.
+
+Ensuite nous allons voir les 2 lignes suivantes : `listen 80` et `server_name localhost`. La premiere signifie que l'on ecoute le port 80. Ce port est utilisé par le protocole HTTP. La deuxieme serta specifier le hostname. Ce qui veut dire que ce serveur gerera toute les connections qui auront dans le champ `Host` de leur requete HTTP localhost.
+
+Ensuite nous avons la regée 
+```
+location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+```
+Cette configuration indique que pour les url / (qui correspond a root) qu'il faudra regarder les fichier dans le dossier mis apres `root`. Et que si aucun fichier n'est specifié qu'il serve le fichier mis apres l'option `index`.
+
+Pour que cela fonctionne il faut aussi ajouter une regle qui permettront d'inclure les fichier css. Ceci peut etre fait avec la config suivante 
+```
+location ~ \.css$ {
+            root /usr/share/nginx/html;
+            types {
+                text/css css; 
+                }
+        }
+```
+Cette regle s'applique a tout les fichiers qui finissent par .css et indique au serveur que le type des fichier est css. 
+
+### Dockerfile
+
+Le dockerfile est basé sur l'image publique nginx. 
+
+Les 2 premieres lignes sont
+```
+COPY www /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+```
+Ces 2 lignes servent a prendre les fichier du coté machine (en premier les fichier du site et ensuite le fichier de config nginx).
+
+Il les copie aux bons endroits du container docker.
+
+Ensuite nous utilions la commnde `EXPOSE 80` pour exposer le port 80 hors du container et permettre a l'exterieur de lui addresser des requetes sur ce port.
+
+Puis la derniere commande est `CMD ["nginx", "-g", "daemon off;"]` qui lance nging avec les options `-g` et `daemon:off`. Le flag `-g` qui permet de passer des options a nginx et `deamin:off` permet d'utiliser nginx pas en background qui est un good practice pour dans un container.
+
+## Step 2
