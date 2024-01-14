@@ -1,20 +1,6 @@
 version: '3'
 services:
 
-  api:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-    deploy:
-      replicas: 1
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`localhost`)"
-      - "traefik.http.services.api.loadbalancer.server.port=7000"
-      - "traefik.http.routers.api.rule=PathPrefix(`/api`)"
-      - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
-      - "traefik.http.routers.express.middlewares=api-strip"
-
   sweb:
     build:
       context: ./sweb
@@ -26,6 +12,28 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sweb.rule=Host(`localhost`)"
+
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    deploy:
+      replicas: 4
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`localhost`)"
+      - "traefik.http.services.api.loadbalancer.server.port=7000"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`)"
+       # Stripper
+      - "traefik.http.routers.api.middlewares=api-strip"
+      - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
+       # Sticky session
+      - "traefik.http.services.api.loadBalancer.sticky.cookie=true"
+      - "traefik.http.services.api.loadBalancer.sticky.cookie.name=api_sticky_cookie"
+
+      
+
 
   reverse-proxy:
     image: traefik:v2.10
