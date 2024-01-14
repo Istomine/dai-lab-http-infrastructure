@@ -1,6 +1,7 @@
 package HeigCorp.app;
 
 import HeigCorp.app.controller.KirbyController;
+import HeigCorp.app.model.Kirby;
 import io.javalin.Javalin;
 
 /**
@@ -13,6 +14,8 @@ public class App
     {
         Javalin app = Javalin.create().start(7000);
         KirbyController kirbyController = new KirbyController();
+
+
         app.post("/kirby/create",kirbyController::createKirby);
         app.put("/kirby/feed/{id}", kirbyController::feedKirby);
         app.get("/kirby/get/{id}", kirbyController::getOneKirby);
