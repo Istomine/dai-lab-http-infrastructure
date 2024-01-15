@@ -190,6 +190,7 @@ Pour utiliser les sticky session pour l'api on rajoute :
       - "traefik.http.services.api.loadBalancer.sticky.cookie=true"
       - "traefik.http.services.api.loadBalancer.sticky.cookie.name=api_sticky_cookie"
 ```
-
+![example1](pic/api.png)
+![example1](pic/static.png)
 
 
