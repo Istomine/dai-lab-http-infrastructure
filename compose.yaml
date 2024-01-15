@@ -12,14 +12,12 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sweb.rule=Host(`localhost`)"
-
-
   api:
     build:
       context: ./api
       dockerfile: Dockerfile
     deploy:
-      replicas: 4
+      replicas: 1
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`localhost`)"
@@ -31,9 +29,6 @@ services:
        # Sticky session
       - "traefik.http.services.api.loadBalancer.sticky.cookie=true"
       - "traefik.http.services.api.loadBalancer.sticky.cookie.name=api_sticky_cookie"
-
-      
-
 
   reverse-proxy:
     image: traefik:v2.10
