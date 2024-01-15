@@ -173,6 +173,23 @@ Cette partie à été rajouté en plus de la configuration de base. La section d
 
 La sections labels est utilisé par traefik. La premiere ligne indique qu'on active traefik pour le service sweb et la seconde ligne définit une règle qui indique que le service doit être accessible via localhost.
 
+Le reverse-proxy nous permet de sécuriser les accès à nos services, car le client n'interagit pas directement avec les serveurs. Ce dernier passer qu'a travers les routes qu'on a crée et le entrypoint qu'on a configuré.
+
+Pour accèder au dashboard, il suffie d'aller sur http://localhost:8080/dashboard/#/
+
 ## Step 5
 
+Pour demarrer plusieurs instances d'un service, on utilise la section replicas dans le docker compose
+Pour ajouter ou enlever dynamiquement, on utilise la commande :
+    docker-compose up --scale sweb=4 --scale api=3 -d
+
 ## Step 6
+
+Pour utiliser les sticky session pour l'api on rajoute :
+``` yaml
+      - "traefik.http.services.api.loadBalancer.sticky.cookie=true"
+      - "traefik.http.services.api.loadBalancer.sticky.cookie.name=api_sticky_cookie"
+```
+
+
+
