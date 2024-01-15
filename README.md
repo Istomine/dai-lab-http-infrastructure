@@ -83,7 +83,24 @@ Pour ceci il faut créer un fichier compose.yaml
 
 Pour pouvoir dans un premier temps lancer l'application avec docker compose. Dans ce fichier nous declarons un service `sweb` qui utiliseras l'image du dossier sweb. Puis pour pouvoir le build il faudra ajouter la directive build comme ceci: 
 ```
-build:
+version: '3'
+services:
+
+  sweb:
+    build:
       context: ./sweb
       dockerfile: Dockerfile
+    volumes:
+      - ./sweb/www:/usr/share/nginx/html
 ```
+La ligne version indique la version de docker compose qu'on utilise et la ligne services indique le debut de la section ou on va déclarer nos services.
+La section build permet de construire notre service. context indique ou se trouve le repertoire avec les fichiers sources nécessaire à la construction du service et dockerfile indique le nom du fichier Dockerfile
+La section volumes indique ou le contenue du repertoire ."/sweb/www" doit être monté dans le conteneur. Ici, il va être monté dans le répertoire "/usr/share/nginx/html"
+
+## Step 3
+
+## Step 4
+
+## Step 5
+
+## Step 6
