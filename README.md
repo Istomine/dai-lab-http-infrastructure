@@ -190,7 +190,11 @@ Pour utiliser les sticky session pour l'api on rajoute :
       - "traefik.http.services.api.loadBalancer.sticky.cookie=true"
       - "traefik.http.services.api.loadBalancer.sticky.cookie.name=api_sticky_cookie"
 ```
-![example1](pic/api.png)
-![example1](pic/static.png)
 
+On peut voir sur cette image que quand on arrive sur le site statique, on ne recoit pas de cookie. 
 
+![static](pic/static.png)
+
+Alors que pour l'api, on a un cookie qui se nomme api_sticky_cookie
+
+![api](pic/api.png)
