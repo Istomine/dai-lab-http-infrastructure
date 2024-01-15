@@ -1,4 +1,4 @@
-# Labo 5 HTTP INFRSASTRUCTURE
+# Labo 5 HTTP Infrastructure
 
 ## Goal
 
@@ -100,6 +100,60 @@ La section volumes indique ou le contenue du repertoire ."/sweb/www" doit être 
 ## Step 3
 
 ## Step 4
+Dans cette partie nous allons mettre en place le reverse-proxy. Pour cela, nosu allons utilisé Traefik
+
+``` yaml
+version: '3'
+services:
+
+  sweb:
+    build:
+      context: ./sweb
+      dockerfile: Dockerfile
+    volumes:
+      - ./sweb/www:/usr/share/nginx/html
+    deploy:
+      replicas: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sweb.rule=Host(`localhost`)"
+
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    deploy:
+      replicas: 4
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`localhost`)"
+      - "traefik.http.services.api.loadbalancer.server.port=7000"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`)"
+       # Stripper
+      - "traefik.http.routers.api.middlewares=api-strip"
+      - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
+       # Sticky session
+      - "traefik.http.services.api.loadBalancer.sticky.cookie=true"
+      - "traefik.http.services.api.loadBalancer.sticky.cookie.name=api_sticky_cookie"
+
+      
+
+
+  reverse-proxy:
+    image: traefik:v2.10
+    command:
+     - "--api.insecure=true"
+     - "--providers.docker"
+     - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+```
+
+
 
 ## Step 5
 
