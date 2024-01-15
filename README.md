@@ -145,6 +145,22 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 ```
+Dans cette étape deux nouvelles sections ont été rajoutée. reverse-proxy et api. La premiere est simplement une config de base qu'on trouve sur le site de traefik à laquelle on a rajouté une entrypoints sur le port 80 pour que Traefik puisse écouté ce port.
+
+Les lignes avant ne sont pas très interessante. On va expliquer les lignes qui conserne Traefik. 
+```yaml
+  api:
+    labels:
+      - "traefik.enable=true" # Active Traefik pour ce service
+      - "traefik.http.routers.api.rule=Host(`localhost`)" # Règle indiquant ou le service doit être accessible
+      - "traefik.http.services.api.loadbalancer.server.port=7000" # Indique sur quel port l'api est exposé
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`)" #Règle de routage supplémentaire qui indique le chemain             pour accéder à l'api
+       # Stripper
+      - "traefik.http.routers.api.middlewares=api-strip"
+      - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
+```
+Les deux dernieres lignes indique qu'on utilise un middleware stripper qui permet d'enlevé le prefixe /api avant de communiquer avec le service réel.
+
 ``` yaml
 sweb:
     deploy:
