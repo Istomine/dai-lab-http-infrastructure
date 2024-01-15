@@ -71,4 +71,9 @@ public class KirbyController {
         kirbys.remove(Integer.parseInt(ctx.pathParam("id")));
         ctx.status(200);
     }
+
+    public void deleteAllKirby(Context ctx){
+        kirbys.clear();
+        ctx.status(200);
+    }
 }

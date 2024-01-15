@@ -69,4 +69,21 @@ Ensuite nous utilions la commnde `EXPOSE 80` pour exposer le port 80 hors du con
 
 Puis la derniere commande est `CMD ["nginx", "-g", "daemon off;"]` qui lance nging avec les options `-g` et `daemon:off`. Le flag `-g` qui permet de passer des options a nginx et `deamin:off` permet d'utiliser nginx pas en background qui est un good practice pour dans un container.
 
+### Test
+
+Pour tester si cette étape fonctionne il suffit de build l'image docker, lancer l'image puis de se rendre a l'addresse `localhost:80` et il devrait avoir le site statique qui s'affiche avec le css
+
 ## Step 2
+
+Pour cette etape, nous devons simplifier le deploiement de notre simple application avec un docker compose. En outre, il doit etre possible de build notre Dockerfile via le docker compose
+
+Pour ceci il faut créer un fichier compose.yaml
+
+### Compose.yaml
+
+Pour pouvoir dans un premier temps lancer l'application avec docker compose. Dans ce fichier nous declarons un service `sweb` qui utiliseras l'image du dossier sweb. Puis pour pouvoir le build il faudra ajouter la directive build comme ceci: 
+```
+build:
+      context: ./sweb
+      dockerfile: Dockerfile
+```
