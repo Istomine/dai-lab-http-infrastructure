@@ -82,7 +82,7 @@ Pour ceci il faut créer un fichier compose.yaml
 ### Compose.yaml
 
 Pour pouvoir dans un premier temps lancer l'application avec docker compose. Dans ce fichier nous declarons un service `sweb` qui utiliseras l'image du dossier sweb. Puis pour pouvoir le build il faudra ajouter la directive build comme ceci: 
-```
+``` yaml
 version: '3'
 services:
 
@@ -118,13 +118,12 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.sweb.rule=Host(`localhost`)"
 
-
   api:
     build:
       context: ./api
       dockerfile: Dockerfile
     deploy:
-      replicas: 4
+      replicas: 1
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`localhost`)"
@@ -133,12 +132,6 @@ services:
        # Stripper
       - "traefik.http.routers.api.middlewares=api-strip"
       - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
-       # Sticky session
-      - "traefik.http.services.api.loadBalancer.sticky.cookie=true"
-      - "traefik.http.services.api.loadBalancer.sticky.cookie.name=api_sticky_cookie"
-
-      
-
 
   reverse-proxy:
     image: traefik:v2.10
@@ -152,8 +145,17 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 ```
+``` yaml
+sweb:
+    deploy:
+      replicas: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sweb.rule=Host(`localhost`)"
+```
+Cette partie à été rajouté en plus de la configuration de base. La section deploy replicas indique combien de service on veut deployer
 
-
+La sections labels est utilisé par traefik. La premiere ligne indique qu'on active traefik pour le service sweb et la seconde ligne définit une règle qui indique que le service doit être accessible via localhost.
 
 ## Step 5
 
