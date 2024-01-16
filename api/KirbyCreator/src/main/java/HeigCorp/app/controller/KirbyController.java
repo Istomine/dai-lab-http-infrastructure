@@ -41,21 +41,6 @@ public class KirbyController {
         test = new Kirby("Lea","5.jpg");
         kirbys.put(id++,test);
 
-        ClassLoader classLoader = KirbyController.class.getClassLoader();
-
-        // Obtenez toutes les ressources avec le nom spécifié (ici, "images")
-        String resourceName = "image/0.jpg";
-        try {
-            Enumeration<URL> resources = classLoader.getResources(resourceName);
-            System.out.println("lol");
-            // Parcourez les ressources et imprimez les noms
-            while (resources.hasMoreElements()) {
-                URL resource = resources.nextElement();
-                System.out.println("Resource: " + resource.getFile());
-            }
-        }catch (Exception ignored){
-
-        }
     }
     private void updateKirbyStat(Kirby kirby){
         Duration durationLastUpdated  = Duration.between(Instant.now(),kirby.getLastUpdated());
@@ -124,7 +109,6 @@ public class KirbyController {
         System.out.println(imagePath);
         if (inputStream != null) {
             try {
-                // Utilisez un ByteArrayOutputStream pour lire les octets du fichier
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 int nRead;
                 byte[] data = new byte[1024];
@@ -135,7 +119,6 @@ public class KirbyController {
 
                 buffer.flush();
 
-                // Renvoyez les octets en tant que réponse HTTP
                 System.out.println("sended");
                 ctx.result(buffer.toByteArray()).contentType("image/jpeg");
             } catch (Exception e) {
