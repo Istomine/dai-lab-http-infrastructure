@@ -1,4 +1,4 @@
-# Labo 5 HTTP INFRSASTRUCTURE
+# Labo 5 HTTP Infrastructure
 
 ## Goal
 
@@ -82,16 +82,166 @@ Pour ceci il faut créer un fichier compose.yaml
 ### Compose.yaml
 
 Pour pouvoir dans un premier temps lancer l'application avec docker compose. Dans ce fichier nous declarons un service `sweb` qui utiliseras l'image du dossier sweb. Puis pour pouvoir le build il faudra ajouter la directive build comme ceci: 
-```
-build:
+``` yaml
+version: '3'
+services:
+
+  sweb:
+    build:
       context: ./sweb
       dockerfile: Dockerfile
+    volumes:
+      - ./sweb/www:/usr/share/nginx/html
 ```
-Ou nous specifions d'abord le contexte de build puis le nom du Dockerfile.
-
-### Test
-Pour tester que cette etape est validée il suffit de faire `docler compose build` puis `docker compose up` afin de verifier si nous avons le meme resultat qu'a l'etape precedante. Si nous avons le meme resultat cela veut dire que tout fonctionne correctement et que nous pouvons passer a l'etape suivante
+La ligne version indique la version de docker compose qu'on utilise et la ligne services indique le debut de la section ou on va déclarer nos services.
+La section build permet de construire notre service. context indique ou se trouve le repertoire avec les fichiers sources nécessaire à la construction du service et dockerfile indique le nom du fichier Dockerfile
+La section volumes indique ou le contenue du repertoire ."/sweb/www" doit être monté dans le conteneur. Ici, il va être monté dans le répertoire "/usr/share/nginx/html"
 
 ## Step 3
 
-Dans cette étape nous devons developper un petit serveur REST api en Java a l'aide de la librairie Javalin. Cette api doit au minimum effectué les operations CRUD (Create Read Update Delete). Comme exemple d'API nous avons decidé de faire une application de gestion de Kirby.
+## Step 4
+Dans cette partie nous allons mettre en place le reverse-proxy. Pour cela, nosu allons utilisé Traefik
+
+``` yaml
+version: '3'
+services:
+
+  sweb:
+    build:
+      context: ./sweb
+      dockerfile: Dockerfile
+    volumes:
+      - ./sweb/www:/usr/share/nginx/html
+    deploy:
+      replicas: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sweb.rule=Host(`localhost`)"
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    deploy:
+      replicas: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`localhost`)"
+      - "traefik.http.services.api.loadbalancer.server.port=7000"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`)"
+       # Stripper
+      - "traefik.http.routers.api.middlewares=api-strip"
+      - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
+
+  reverse-proxy:
+    image: traefik:v2.10
+    command:
+     - "--api.insecure=true"
+     - "--providers.docker"
+     - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+```
+Dans cette étape deux nouvelles sections ont été rajoutée. reverse-proxy et api. La premiere est simplement une config de base qu'on trouve sur le site de traefik à laquelle on a rajouté une entrypoints sur le port 80 pour que Traefik puisse écouté ce port.
+
+Les lignes avant ne sont pas très interessante. On va expliquer les lignes qui conserne Traefik. 
+```yaml
+  api:
+    labels:
+      - "traefik.enable=true" # Active Traefik pour ce service
+      - "traefik.http.routers.api.rule=Host(`localhost`)" # Règle indiquant ou le service doit être accessible
+      - "traefik.http.services.api.loadbalancer.server.port=7000" # Indique sur quel port l'api est exposé
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`)" #Règle de routage supplémentaire qui indique le chemain             pour accéder à l'api
+       # Stripper
+      - "traefik.http.routers.api.middlewares=api-strip"
+      - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
+```
+Les deux dernieres lignes indique qu'on utilise un middleware stripper qui permet d'enlevé le prefixe /api avant de communiquer avec le service réel.
+
+``` yaml
+sweb:
+    deploy:
+      replicas: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sweb.rule=Host(`localhost`)"
+```
+Cette partie à été rajouté en plus de la configuration de base. La section deploy replicas indique combien de service on veut deployer
+
+La sections labels est utilisé par traefik. La premiere ligne indique qu'on active traefik pour le service sweb et la seconde ligne définit une règle qui indique que le service doit être accessible via localhost.
+
+Le reverse-proxy nous permet de sécuriser les accès à nos services, car le client n'interagit pas directement avec les serveurs. Ce dernier passer qu'a travers les routes qu'on a crée et le entrypoint qu'on a configuré.
+
+Pour accèder au dashboard, il suffie d'aller sur http://localhost:8080/dashboard/#/
+
+## Step 5
+
+Pour demarrer plusieurs instances d'un service, on utilise la section replicas dans le docker compose
+Pour ajouter ou enlever dynamiquement, on utilise la commande :
+    docker-compose up --scale sweb=4 --scale api=3 -d
+
+## Step 6
+
+Pour utiliser les sticky session pour l'api on rajoute :
+``` yaml
+      - "traefik.http.services.api.loadBalancer.sticky.cookie=true"
+      - "traefik.http.services.api.loadBalancer.sticky.cookie.name=api_sticky_cookie"
+```
+
+On peut voir sur cette image que quand on arrive sur le site statique, on ne recoit pas de cookie. 
+
+![static](pic/static.png)
+
+Alors que pour l'api, on a un cookie qui se nomme api_sticky_cookie
+
+![api](pic/api.png)
+
+## Step 7
+
+Pour commencer, on a modifié le fichier compose.yml. On a rajouté les lignes : 
+```yaml
+- "traefik.http.routers.sweb.tls=true" # Partie statique
+- "traefik.http.routers.api.tls=true" # Partie api
+- - "--entrypoints.websecure.address=:443" # Partie Traefik
+```
+Les deux premieres lignes permettent d'activé HTTPS pour ces services. La dernieres definit un point d'entrée sur le port 433 qui correspond au port pour HTTPS. 
+
+Par ailleures, on a aussi monté les certificats et le fichier de config dans le conteneur Traefik
+
+```yaml
+    - ./certificat:/etc/traefik/certificates
+    - ./traefik.yml:/etc/traefik/traefik.yaml
+```
+
+
+Ensuite, on a rajouté le fichier de configuration traefik.yml qui correspond au parametre fournit sur le site de traefik :
+
+```yaml
+providers:
+  docker: {}
+
+entryPoints:
+  web:
+    address: ":80"
+
+  websecure:
+    address: ":443"
+
+tls:
+  certificates:
+    - certFile: /certificat/cert.pem
+      keyFile: /certificat/key.pem
+
+api:
+  dashboard: true
+  insecure: true
+```
+On peut voir qu'on arrive à acceder aux sites à travers https
+
+![static](pic/httpsStatic.png)
+
+![api](pic/httpsApi.png)
+
