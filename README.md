@@ -198,3 +198,50 @@ On peut voir sur cette image que quand on arrive sur le site statique, on ne rec
 Alors que pour l'api, on a un cookie qui se nomme api_sticky_cookie
 
 ![api](pic/api.png)
+
+## Step 7
+
+Pour commencer, on a modifié le fichier compose.yml. On a rajouté les lignes : 
+```yaml
+- "traefik.http.routers.sweb.tls=true" # Partie statique
+- "traefik.http.routers.api.tls=true" # Partie api
+- - "--entrypoints.websecure.address=:443" # Partie Traefik
+```
+Les deux premieres lignes permettent d'activé HTTPS pour ces services. La dernieres definit un point d'entrée sur le port 433 qui correspond au port pour HTTPS. 
+
+Par ailleures, on a aussi monté les certificats et le fichier de config dans le conteneur Traefik
+
+```yaml
+    - ./certificat:/etc/traefik/certificates
+    - ./traefik.yml:/etc/traefik/traefik.yaml
+```
+
+
+Ensuite, on a rajouté le fichier de configuration traefik.yml qui correspond au parametre fournit sur le site de traefik :
+
+```yaml
+providers:
+  docker: {}
+
+entryPoints:
+  web:
+    address: ":80"
+
+  websecure:
+    address: ":443"
+
+tls:
+  certificates:
+    - certFile: /certificat/cert.pem
+      keyFile: /certificat/key.pem
+
+api:
+  dashboard: true
+  insecure: true
+```
+On peut voir qu'on arrive à acceder aux sites à travers https
+
+![static](pic/httpsStatic.png)
+
+![api](pic/httpsApi.png)
+
