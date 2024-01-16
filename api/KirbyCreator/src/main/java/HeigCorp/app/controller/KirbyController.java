@@ -77,7 +77,7 @@ public class KirbyController {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             JsonNode object = objectMapper.readTree(ctx.body());
-            int randomNumber = new Random().nextInt(11);
+            int randomNumber = new Random().nextInt(16);
             String randomString = Integer.toString(randomNumber);
             String imageName = randomString + ".jpg";
             Kirby kirby = new Kirby(object.get("name").asText(),imageName);
@@ -116,16 +116,13 @@ public class KirbyController {
                 while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
                     buffer.write(data, 0, nRead);
                 }
-
                 buffer.flush();
 
-                System.out.println("sended");
                 ctx.result(buffer.toByteArray()).contentType("image/jpeg");
             } catch (Exception e) {
                 ctx.status(500).result("Internal Server Error");
             }
         } else {
-            // Si l'image n'est pas trouvée, renvoyez une réponse 404
             ctx.status(404).result("Image not found");
         }
     }
