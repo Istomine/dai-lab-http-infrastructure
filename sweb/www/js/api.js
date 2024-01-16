@@ -22,16 +22,6 @@ async function createKirby(e){
     window.location.reload();
 }
 
-async function getKirbyImage(id) {
-    const imageUrl = `https://localhost/api/kirby/image/${id}`;
-
-    const response = await fetch(imageUrl);
-
-    const blob = response.blob()
-
-    return URL.createObjectURL(blob);
-}
-
 function createCard(index, title, hunger,swag, imageUrl){
     const orientation = index % 2  == 0 ? 'order-lg-first' : '';
     const html = `
