@@ -12,6 +12,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sweb.rule=Host(`localhost`)"
+        # Parametre pour HTTPS
       - "traefik.http.routers.sweb.tls=true"
   api:
     build:
@@ -22,7 +23,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`localhost`)"
-      - "traefik.http.services.api.loadbalancer.server.port=7000"
       - "traefik.http.routers.api.rule=PathPrefix(`/api`)"
        # Stripper
       - "traefik.http.routers.api.middlewares=api-strip"
@@ -30,6 +30,7 @@ services:
        # Sticky session
       - "traefik.http.services.api.loadBalancer.sticky.cookie=true"
       - "traefik.http.services.api.loadBalancer.sticky.cookie.name=api_sticky_cookie"
+       # Parametre pour HTTPS
       - "traefik.http.routers.api.tls=true"
 
   reverse-proxy:
@@ -45,6 +46,7 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+        # Parametre pour HTTPS
       - ./certificat:/etc/traefik/certificates
       - ./traefik.yml:/etc/traefik/traefik.yaml
 
