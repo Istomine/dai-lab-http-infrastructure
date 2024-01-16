@@ -1,0 +1,17 @@
+providers:
+  docker: {}
+entryPoints:
+  web:
+    address: ":80"
+
+  websecure:
+    address: ":443"
+
+tls:
+  certificates:
+    - certFile: /certificat/cert.pem
+      keyFile: /certificat/key.pem
+
+api:
+  dashboard: true
+  insecure: true
