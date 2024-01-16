@@ -1,5 +1,3 @@
-console.log("Test")
-
 window.addEventListener('DOMContentLoaded', event => {
 
     // Navbar shrink function

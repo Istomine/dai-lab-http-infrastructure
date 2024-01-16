@@ -1,13 +1,39 @@
 async function fetchAllKirby(){
-    const url  = "http://localhost/api/kirby/get"
+    const url  = "https://localhost/api/kirby/get"
 
     const response = await fetch(url);
     return await response.json()
 }
 
-function createCard(index, title, content, imageUrl){
+async function createKirby(e){
+    e.preventDefault()
+    fetchAllKirby();
+    const kirbyName = document.getElementById("kirbyName").value
+    const data = {
+        name: kirbyName
+    };
+    const response = await fetch('https://localhost/api/kirby/create', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    document.getElementById("kirbyName").value = ""
+
+    window.location.hash = "projects";
+    window.location.reload();
+}
+
+async function getKirbyImage(id) {
+    const imageUrl = `https://localhost/api/kirby/image/${id}`;
+
+    const response = await fetch(imageUrl);
+
+    const blob = response.blob()
+
+    return URL.createObjectURL(blob);
+}
+
+function createCard(index, title, hunger,swag, imageUrl){
     const orientation = index % 2  == 0 ? 'order-lg-first' : '';
-    console.log(orientation)
     const html = `
     <div class="row gx-0 justify-content-center">
         <div class="col-lg-6"><img class="img-fluid" src="${imageUrl}" alt="..." /></div>
@@ -16,7 +42,10 @@ function createCard(index, title, content, imageUrl){
                 <div class="d-flex h-100">
                     <div class="project-text w-100 my-auto text-center text-lg-${orientation}">
                         <h4 class="text-white">${title}</h4>
-                        <p class="mb-0 text-white-50">${content}</p>
+                        <p class="mb-0 text-white-50">
+                            Hunger : ${hunger}
+                            Swag : ${swag}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -24,22 +53,18 @@ function createCard(index, title, content, imageUrl){
     </div>
     `
     const elementToAppend = document.getElementsByClassName("kirby-list")[0];
-    console.log(elementToAppend)
     const newCard = document.createElement('div');
     newCard.innerHTML = html;
     elementToAppend.appendChild(newCard);
+    
 }
 
-function editContent(divToModify, content){
+document.getElementById("submitButton").addEventListener("click",createKirby);
 
-    divToModify.textContent = content;
-    console.log(htmlDiv)
-}
-const htmlDiv = document.getElementsByClassName("content")[0];
-
-editContent(htmlDiv,"lol")
-
-createCard(0,"lol1","22","assets/img/demo-image-01x.jpg")
-createCard(1,"lol2","22","assets/img/demo-image-01x.jpg")
-createCard(2,"lol3","22","assets/img/demo-image-01x.jpg")
-createCard(3,"lol4","22","assets/img/demo-image-01x.jpg")
+const kirbys = await fetchAllKirby();
+let index = 0;
+kirbys.forEach(element => {
+    const imageUrl = `https://localhost/api/kirby/image/${index}`;
+    createCard(index,element.name,element.hunger,element.swagPoint,imageUrl)
+    index++;
+});

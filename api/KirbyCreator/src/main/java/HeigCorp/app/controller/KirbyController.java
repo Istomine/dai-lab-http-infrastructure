@@ -1,5 +1,6 @@
 package HeigCorp.app.controller;
 
+import HeigCorp.app.App;
 import HeigCorp.app.model.Kirby;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -7,9 +8,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.http.Context;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class KirbyController {
@@ -20,8 +28,34 @@ public class KirbyController {
     public KirbyController(){
         this.id = 0;
 
-        Kirby test = new Kirby("Rene","lol");
-        kirbys.put(++id,test);
+        Kirby test = new Kirby("Rene","0.jpg");
+        kirbys.put(id++,test);
+        test = new Kirby("Morgane","1.jpg");
+        kirbys.put(id++,test);
+        test = new Kirby("Marc","2.jpg");
+        kirbys.put(id++,test);
+        test = new Kirby("Paul","3.jpg");
+        kirbys.put(id++,test);
+        test = new Kirby("Henry","4.jpg");
+        kirbys.put(id++,test);
+        test = new Kirby("Lea","5.jpg");
+        kirbys.put(id++,test);
+
+        ClassLoader classLoader = KirbyController.class.getClassLoader();
+
+        // Obtenez toutes les ressources avec le nom spécifié (ici, "images")
+        String resourceName = "image/0.jpg";
+        try {
+            Enumeration<URL> resources = classLoader.getResources(resourceName);
+            System.out.println("lol");
+            // Parcourez les ressources et imprimez les noms
+            while (resources.hasMoreElements()) {
+                URL resource = resources.nextElement();
+                System.out.println("Resource: " + resource.getFile());
+            }
+        }catch (Exception ignored){
+
+        }
     }
     private void updateKirbyStat(Kirby kirby){
         Duration durationLastUpdated  = Duration.between(Instant.now(),kirby.getLastUpdated());
@@ -54,10 +88,14 @@ public class KirbyController {
     }
 
     public void createKirby(Context ctx){
+        System.out.println("hello");
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             JsonNode object = objectMapper.readTree(ctx.body());
-            Kirby kirby = new Kirby(object.get("name").asText(),object.get("image").asText());
+            int randomNumber = new Random().nextInt(11);
+            String randomString = Integer.toString(randomNumber);
+            String imageName = randomString + ".jpg";
+            Kirby kirby = new Kirby(object.get("name").asText(),imageName);
             kirbys.put(id++,kirby);
             System.out.println(kirby.getName() + " created !");
         } catch (JsonProcessingException e) {
@@ -75,5 +113,37 @@ public class KirbyController {
     public void deleteAllKirby(Context ctx){
         kirbys.clear();
         ctx.status(200);
+    }
+
+    public void getKirbyImage(Context ctx) {
+        Kirby kirby = kirbys.get(Integer.parseInt(ctx.pathParam("id")));
+        updateKirbyStat(kirby);
+
+        String imagePath = "/image/" + kirby.getImage();
+        InputStream inputStream = App.class.getResourceAsStream(imagePath);
+        System.out.println(imagePath);
+        if (inputStream != null) {
+            try {
+                // Utilisez un ByteArrayOutputStream pour lire les octets du fichier
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                int nRead;
+                byte[] data = new byte[1024];
+
+                while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                    buffer.write(data, 0, nRead);
+                }
+
+                buffer.flush();
+
+                // Renvoyez les octets en tant que réponse HTTP
+                System.out.println("sended");
+                ctx.result(buffer.toByteArray()).contentType("image/jpeg");
+            } catch (Exception e) {
+                ctx.status(500).result("Internal Server Error");
+            }
+        } else {
+            // Si l'image n'est pas trouvée, renvoyez une réponse 404
+            ctx.status(404).result("Image not found");
+        }
     }
 }
