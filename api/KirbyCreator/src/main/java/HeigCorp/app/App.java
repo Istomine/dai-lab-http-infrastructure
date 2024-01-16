@@ -14,7 +14,7 @@ public class App
     {
         Javalin app = Javalin.create().start(7000);
         KirbyController kirbyController = new KirbyController();
-        
+
         app.post("/kirby/create",kirbyController::createKirby);
         app.put("/kirby/feed/{id}", kirbyController::feedKirby);
         app.get("/kirby/get/{id}", kirbyController::getOneKirby);

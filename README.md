@@ -87,3 +87,11 @@ build:
       context: ./sweb
       dockerfile: Dockerfile
 ```
+Ou nous specifions d'abord le contexte de build puis le nom du Dockerfile.
+
+### Test
+Pour tester que cette etape est validée il suffit de faire `docler compose build` puis `docker compose up` afin de verifier si nous avons le meme resultat qu'a l'etape precedante. Si nous avons le meme resultat cela veut dire que tout fonctionne correctement et que nous pouvons passer a l'etape suivante
+
+## Step 3
+
+Dans cette étape nous devons developper un petit serveur REST api en Java a l'aide de la librairie Javalin. Cette api doit au minimum effectué les operations CRUD (Create Read Update Delete). Comme exemple d'API nous avons decidé de faire une application de gestion de Kirby.
