@@ -99,6 +99,9 @@ La section volumes indique ou le contenue du repertoire ."/sweb/www" doit être 
 
 ## Step 3
 
+Pour la partie realisation de l'api nous avons decidé de simuler un elevage de Kirby. Chaque kirby disposera d'une image aleatoire et d'un nom ainsi que divers statistique. Nous pouvons créer, lire, mettre a jour les statistique et detruire les kirby.
+Pour l'implementation nous avons utilisé la librairie Javalin comme vu dans le cours. Il n'y a pas de grande revoultion dans l'implementation hormis le fait que les statistique evoluent dans le temps des kirby.
+
 ## Step 4
 Dans cette partie nous allons mettre en place le reverse-proxy. Pour cela, nosu allons utilisé Traefik
 
@@ -300,3 +303,6 @@ location ~ \.js$ {
         }
 ```
 Nous faisons 3 requete differente. 2 get et un post. Une requete pour obtenir tous les kirby, et une requete par kirby pour recuperer leur image ainsi qu'une requete pour créer son propre Kirby.
+Pour la requete je me contente de faire un fetch sur l'endpoint de l'api qui me permet de recuperer tous les kirby. Puis pour chaque kirby je refais une requete pour recevoir l'image associée au Kirby.
+
+En outre nous utilisons un petit formulaire qui permet de créer un kirby en lui precisant son nom
