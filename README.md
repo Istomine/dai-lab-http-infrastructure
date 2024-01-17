@@ -245,3 +245,20 @@ On peut voir qu'on arrive à acceder aux sites à travers https
 
 ![api](pic/httpsApi.png)
 
+## Optional step 2
+
+Pour cette etape nous allons reprendre le site d'exemple que nous avons utilisé pour l'etape une et nous allons la rendre dynamique avec l'api fetch.
+Pour ce faire nous avons créé un nouveau fichier js. Etant donné que nous detestons la syntaxe `Promise` de javascript et que cela n'avait pas d'interet de l'utiliser
+nous allons utiliser le mot clé `await` de javascript. Ce qui implique que nos fonctions devront etre declarée comme asynchrone avec le mot clé `async`.
+Mais nous ne pouvons pas l'utiliser en top level. Pour que nous puissions le faire nous devons dire que notre fichier est de type `module`.
+Mais en faisant cela nous devons configurer notre serveur nginx pour lui dire que nous acceptons des fichier de format js. Pour ce faire nous allons ajouter
+la regle suivante dans le `nginx.conf`
+```
+location ~ \.js$ {
+            root /usr/share/nginx/html;
+            types {
+                application/javascript js;
+                }
+        }
+```
+Nous faisons 3 requete differente. 2 get et un post. Une requete pour obtenir tous les kirby, et une requete par kirby pour recuperer leur image ainsi qu'une requete pour créer son propre Kirby.
