@@ -199,6 +199,15 @@ Alors que pour l'api, on a un cookie qui se nomme api_sticky_cookie
 
 ![api](pic/api.png)
 
+
+On peut le voir mieux avec les logs :
+
+Ici, nous avons la config en round robin pour le site web statique et l'api. Comme on peut le voir sweb-2 est appelé la première fois qu'on va sut le site, puis si on recharge la page c'est sweb-1 qui est appelé. La même chose pour l'api, la moitié des images sont chargé depuis api-1 et l'autre moitié depuis api-2.
+![roundrobin](pic/roundRobin.png)
+
+Une fois les sticky session activées, on peut voir que toutes les images viennent de l'api-1.
+![stickysession](pic/stickySession.png)
+
 ## Step 7
 
 Pour commencer, on a modifié le fichier compose.yml. On a rajouté les lignes : 
