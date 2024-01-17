@@ -190,6 +190,8 @@ Pour utiliser les sticky session pour l'api on rajoute :
       - "traefik.http.services.api.loadBalancer.sticky.cookie=true"
       - "traefik.http.services.api.loadBalancer.sticky.cookie.name=api_sticky_cookie"
 ```
+La premiere ligne indique qu'on active la fonctionnalité de "sticky sessions" pour le service. 
+La seconde spécifie le nom du cookie.
 
 On peut voir sur cette image que quand on arrive sur le site statique, on ne recoit pas de cookie. 
 
@@ -274,7 +276,7 @@ Pour implementer portainer, on a rajouté ces lignes dans le fichier compose.yml
     restart: unless-stopped
 ```
 
-Pour ajouter un nouveau conteneur, il faut cliquer sur local > Containers > cliqué sur le conteneur à dupliquer > cliquer sur Duplicate/Edit. A partir de la faut juste rajouter incrementer le chiffre à la fin du nom du conteneur et decocher always pull the image.
+Pour ajouter un nouveau conteneur, il faut cliquer sur local > Containers > cliqué sur le conteneur à dupliquer > cliquer sur Duplicate/Edit. A partir de là, il faut juste incrementer le chiffre à la fin du nom du conteneur et decocher always pull the image.
 
 On peut voir sur l'image qu'un nouveau conteneur à été démarrer pour l'instance static :
 
