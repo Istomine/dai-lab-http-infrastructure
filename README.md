@@ -245,6 +245,33 @@ On peut voir qu'on arrive à acceder aux sites à travers https
 
 ![api](pic/httpsApi.png)
 
+## Optinal step 1
+
+Nous avons décidé d'utiliser portainer pour réaliser cette étape. Pour accéder au dashboard, il faut aller à l'adresse :
+
+https://localhost:9443/#!/home
+
+et se connecter avec le compte admin et le mot de passe adminadmin12.
+
+Pour implementer portainer, on a rajouté ces lignes dans le fichier compose.yml :
+
+```yaml
+  portainer:
+    image: portainer/portainer-ce:latest
+    ports:
+      - 9443:9443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+```
+
+Pour ajouter un nouveau conteneur, il faut cliquer sur local > Containers > cliqué sur le conteneur à dupliquer > cliquer sur Duplicate/Edit. A partir de la faut juste rajouter incrementer le chiffre à la fin du nom du conteneur et decocher always pull the image.
+
+On peut voir sur l'image qu'un nouveau conteneur à été démarrer pour l'instance static :
+
+![opt1](pic/opt1.png)
+
+
 ## Optional step 2
 
 Pour cette etape nous allons reprendre le site d'exemple que nous avons utilisé pour l'etape une et nous allons la rendre dynamique avec l'api fetch.
