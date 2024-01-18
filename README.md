@@ -103,7 +103,7 @@ Pour la partie realisation de l'api nous avons decidé de simuler un elevage de 
 Pour l'implementation nous avons utilisé la librairie Javalin comme vu dans le cours. Il n'y a pas de grande revoultion dans l'implementation hormis le fait que les statistique evoluent dans le temps des kirby.
 
 ## Step 4
-Dans cette partie nous allons mettre en place le reverse-proxy. Pour cela, nosu allons utilisé Traefik
+Dans cette partie nous allons mettre en place le reverse-proxy. Pour cela, nous allons utilisé Traefik.
 
 ``` yaml
 version: '3'
@@ -148,15 +148,14 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 ```
-Dans cette étape deux nouvelles sections ont été rajoutée. reverse-proxy et api. La premiere est simplement une config de base qu'on trouve sur le site de traefik à laquelle on a rajouté une entrypoints sur le port 80 pour que Traefik puisse écouté ce port.
+Dans cette étape, deux nouvelles sections ont été rajoutées. reverse-proxy et api. La premiere est simplement une config de base qu'on trouve sur le site de traefik à laquelle on a rajouté une entrypoints sur le port 80 pour que Traefik puisse écouté ce port.
 
-Les lignes avant ne sont pas très interessante. On va expliquer les lignes qui conserne Traefik. 
+Concernant l'api, les lignes avant ne sont pas très interessante (partie build). On va expliquer les lignes qui conserne Traefik. 
 ```yaml
   api:
     labels:
       - "traefik.enable=true" # Active Traefik pour ce service
       - "traefik.http.routers.api.rule=Host(`localhost`)" # Règle indiquant ou le service doit être accessible
-      - "traefik.http.services.api.loadbalancer.server.port=7000" # Indique sur quel port l'api est exposé
       - "traefik.http.routers.api.rule=PathPrefix(`/api`)" #Règle de routage supplémentaire qui indique le chemain             pour accéder à l'api
        # Stripper
       - "traefik.http.routers.api.middlewares=api-strip"
@@ -172,9 +171,9 @@ sweb:
       - "traefik.enable=true"
       - "traefik.http.routers.sweb.rule=Host(`localhost`)"
 ```
-Cette partie à été rajouté en plus de la configuration de base. La section deploy replicas indique combien de service on veut deployer
+Cette partie à été rajouté en plus de la configuration de base pour le serveur statique. La section deploy replicas indique combien de service on veut deployer, là même section est aussi présente pour l'api.
 
-La sections labels est utilisé par traefik. La premiere ligne indique qu'on active traefik pour le service sweb et la seconde ligne définit une règle qui indique que le service doit être accessible via localhost.
+La sections labels est utilisé par traefik. La première ligne indique qu'on active traefik pour le service sweb et la seconde ligne définit une règle qui indique que le service doit être accessible via localhost.
 
 Le reverse-proxy nous permet de sécuriser les accès à nos services, car le client n'interagit pas directement avec les serveurs. Ce dernier passer qu'a travers les routes qu'on a crée et le entrypoint qu'on a configuré.
 
@@ -182,9 +181,9 @@ Pour accèder au dashboard, il suffie d'aller sur http://localhost:8080/dashboar
 
 ## Step 5
 
-Pour demarrer plusieurs instances d'un service, on utilise la section replicas dans le docker compose
+Pour demarrer plusieurs instances d'un service, on utilise la section replicas dans le docker compose.
 Pour ajouter ou enlever dynamiquement, on utilise la commande :
-    docker-compose up --scale sweb=4 --scale api=3 -d
+    docker-compose up --scale sweb=<Nb instances> --scale api=<Nb instances> -d
 
 ## Step 6
 
@@ -210,7 +209,7 @@ On peut le voir mieux avec les logs :
 Ici, nous avons la config en round robin pour le site web statique et l'api. Comme on peut le voir sweb-2 est appelé la première fois qu'on va sut le site, puis si on recharge la page c'est sweb-1 qui est appelé. La même chose pour l'api, la moitié des images sont chargé depuis api-1 et l'autre moitié depuis api-2.
 ![roundrobin](pic/roundRobin.png)
 
-Une fois les sticky session activées, on peut voir que toutes les images viennent de l'api-1.
+Une fois les sticky session activées, on peut voir que toutes les images viennent de l'api-1. Et la partie statique n'a pas été changée.
 ![stickysession](pic/stickySession.png)
 
 ## Step 7
@@ -253,6 +252,12 @@ api:
   dashboard: true
   insecure: true
 ```
+
+La section providers indique qu'on utilise docker comme fournisseur de conteneurs.
+La section entryPoint configure les points d'entrée Traefik.
+La section tls, specifie quels sertificats utilisé pour la mise en place de HTTPS.
+La section api, indique qu'on veut un tableau de bord et indique qu'on veut pas le securisé avec HTTPS.
+
 On peut voir qu'on arrive à acceder aux sites à travers https
 
 ![static](pic/httpsStatic.png)
